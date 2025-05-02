@@ -88,7 +88,7 @@ export const userLogin = async (req, res) => {
 export const isAuth = async (req, res) => {
   
   try {
-    const { userId } = req.body;
+    const { userId } = req.user;
 
     const user = await User.findById(userId).select("-password");
 
