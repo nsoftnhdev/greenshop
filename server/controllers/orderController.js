@@ -6,9 +6,8 @@ import User from "../models/User.js";
 // Place Order COD : /api/order/cod
 export const placeOrderCOD = async (req, res) => {
   try {
-    const { userId } = req.user;
 
-    const { items, address } = req.body;
+    const { userId, items, address } = req.body;
 
     if (!address || items.length === 0) {
       return res.json({ success: false, message: "Invalid Data" });
@@ -42,9 +41,8 @@ export const placeOrderCOD = async (req, res) => {
 // Place Order Stripe : /api/order/stripe
 export const placeOrderStipe = async (req, res) => {
   try {
-    const { userId } = req.user;
 
-    const { items, address } = req.body;
+    const { userId, items, address } = req.body;
 
     const { origin } = req.headers;
 
@@ -144,9 +142,9 @@ export const stripeWebhooks = async (request, response) => {
 
       const { orderId, userId } = session.data[0].metadata;
       // Mark Payment as Paid
-      await Order.findByIdAndUpdate(orderId, {isPaid: true})
+      await Order.findByIdAndUpdate(orderId, { isPaid: true });
       // Clear User Cart
-      await User.findByIdAndUpdate(userId, {cartItems: {}})
+      await User.findByIdAndUpdate(userId, { cartItems: {} });
       break;
     }
     case "payment_intent.payment_failed": {
@@ -162,18 +160,19 @@ export const stripeWebhooks = async (request, response) => {
       await Order.findByIdAndDelete(orderId);
       break;
     }
-  
+
     default:
       console.error(`Unhandled event type ${event.type}`);
-      
+
       break;
   }
+  response.json({ recieved: true });
 };
 
 // Get Orders by User ID ; /api/order/user
 export const getUserOrders = async (req, res) => {
   try {
-    const { userId } = req.user;
+    const { userId } = req.body;
     const orders = await Order.find({
       userId,
       $or: [{ paymentType: "COD" }, { isPaid: true }],
